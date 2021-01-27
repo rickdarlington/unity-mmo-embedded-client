@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
         ClientPlayer player = go.GetComponent<ClientPlayer>();
         player.Initialize(data.Id, data.Name);
         players.Add(data.Id, player);
-        
+        Debug.Log($"Players: {players.Count}");
     }
 
     void OnDestroy()

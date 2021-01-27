@@ -26,12 +26,12 @@ public class PlayerLogic : MonoBehaviour
         movement = movement * moveSpeed;
         movement = movement * Time.fixedDeltaTime;
 
-        //CharacterController.Move(new Vector3(0, -0.001f, 0));
+        CharacterController.Move(new Vector3(0, -0.001f, 0));
         if (CharacterController.enabled)
         {
             CharacterController.Move(new Vector3(movement.x, movement.y, 0));
         }
 
-        return new NetworkingData.PlayerStateData(currentStateData.Id, new System.Numerics.Vector2(0,0), 0);
+        return new NetworkingData.PlayerStateData(currentStateData.Id, new System.Numerics.Vector2(transform.localPosition.x, transform.localPosition.y), 0);
     }
 }

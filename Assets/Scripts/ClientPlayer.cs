@@ -1,16 +1,30 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using DarkRift;
 using UnityEngine;
+
+struct ReconciliationInfo
+{
+    public uint Frame;
+    public NetworkingData.PlayerStateData Data;
+    public NetworkingData.PlayerInputData Input;
+    
+    public ReconciliationInfo(uint frame, NetworkingData.PlayerStateData data, NetworkingData.PlayerInputData input)
+    {
+        Frame = frame;
+        Data = data;
+        Input = input;
+    }
+}
 
 [RequireComponent(typeof(PlayerLogic))]
 [RequireComponent(typeof(PlayerInterpolation))]
 public class ClientPlayer : MonoBehaviour
 {
     private PlayerLogic playerLogic;
-
+    private PlayerInterpolation interpolation;
+    private Queue<ReconciliationInfo> reconciliationHistory = new Queue<ReconciliationInfo>();
+    
     private ushort id;
     private string playerName;
     private bool isOwn;
@@ -19,9 +33,7 @@ public class ClientPlayer : MonoBehaviour
     
     private float moveSpeed = 40f;
     private Vector2 moveDirection;
-
-    private PlayerInterpolation Interpolation;
-
+    
     [Header("Settings")]
     [SerializeField]
     private float sensitivityX;
@@ -31,7 +43,7 @@ public class ClientPlayer : MonoBehaviour
     void Awake()
     {
         playerLogic = GetComponent<PlayerLogic>();
-        Interpolation = GetComponent<PlayerInterpolation>();
+        interpolation = GetComponent<PlayerInterpolation>();
     }
     
     public void Initialize(ushort id, string playerName)
@@ -41,11 +53,12 @@ public class ClientPlayer : MonoBehaviour
         //NameText.text = this.playerName;
         if (ConnectionManager.Instance.PlayerId == id)
         {
+            Debug.Log("Got info on our player.");
             isOwn = true;
-            Camera.main.transform.SetParent(transform);
+            /*Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0,0,0);
-            Camera.main.transform.localRotation = Quaternion.identity;
-            Interpolation.CurrentData = new NetworkingData.PlayerStateData(id, new System.Numerics.Vector2(0,0), 0 );
+            Camera.main.transform.localRotation = Quaternion.identity;*/
+            interpolation.CurrentData = new NetworkingData.PlayerStateData(id, new System.Numerics.Vector2(0,0), 0 );
         }
     }
     
@@ -53,11 +66,31 @@ public class ClientPlayer : MonoBehaviour
     {
         if (isOwn)
         {
-        
+            while (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame < GameManager.Instance.LastReceivedServerTick)
+            {
+                reconciliationHistory.Dequeue();
+            }
+
+            if (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame == GameManager.Instance.LastReceivedServerTick)
+            {
+                ReconciliationInfo info = reconciliationHistory.Dequeue();
+                if (Vector3.Distance(new Vector3(info.Data.Position.X, info.Data.Position.Y, 0),  new Vector3(data.Position.X, data.Position.Y, 0)) > 0.05f)
+                {
+
+                    List<ReconciliationInfo> infos = reconciliationHistory.ToList();
+                    interpolation.CurrentData = data;
+                    transform.position = new Vector3(data.Position.X, data.Position.Y, 0);
+                    for (int i = 0; i < infos.Count; i++)
+                    {
+                        NetworkingData.PlayerStateData u = playerLogic.GetNextFrameData(infos[i].Input, interpolation.CurrentData);
+                        interpolation.SetFramePosition(u);
+                    }
+                }
+            }
         }
         else
         {
-            Interpolation.SetFramePosition(data);
+            interpolation.SetFramePosition(data);
         }
     }
 
@@ -77,10 +110,10 @@ public class ClientPlayer : MonoBehaviour
                 NetworkingData.PlayerInputData inputData = new NetworkingData.PlayerInputData(inputs, 0, 0);
 
                 transform.position =
-                    new Vector3(Interpolation.CurrentData.Position.X, Interpolation.CurrentData.Position.Y, 0);
+                    new Vector3(interpolation.CurrentData.Position.X, interpolation.CurrentData.Position.Y, 0);
                 NetworkingData.PlayerStateData nextStateData =
-                    playerLogic.GetNextFrameData(inputData, Interpolation.CurrentData);
-                Interpolation.SetFramePosition(nextStateData);
+                    playerLogic.GetNextFrameData(inputData, interpolation.CurrentData);
+                interpolation.SetFramePosition(nextStateData);
 
                 using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
                 {
