@@ -78,9 +78,9 @@ public class GameManager : MonoBehaviour
     {
         GameObject go = Instantiate(PlayerPrefab);
         ClientPlayer player = go.GetComponent<ClientPlayer>();
-        player.Initialize(data.Id, data.Name);
+        player.Initialize(data.Id, data.Name, data.Position);
         players.Add(data.Id, player);
-        Debug.Log($"Players: {players.Count}");
+        Debug.Log($"Spawn player {data.Name} at [{data.Position.X}, {data.Position.Y}]");
     }
 
     void OnDestroy()
@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
         NetworkingData.GameUpdateData[] receivedGameUpdateData = gameUpdateDataBuffer.Get();
         foreach (NetworkingData.GameUpdateData data in receivedGameUpdateData)
         {
-            //UpdateClientGameState(data);
+            UpdateClientGameState(data);
         }
     }
 

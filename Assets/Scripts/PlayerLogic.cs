@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerLogic : MonoBehaviour
@@ -17,19 +18,30 @@ public class PlayerLogic : MonoBehaviour
     public NetworkingData.PlayerStateData GetNextFrameData(NetworkingData.PlayerInputData input,
         NetworkingData.PlayerStateData currentStateData)
     {
-
-        moveDirection = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        moveSpeed = Mathf.Clamp(moveDirection.magnitude, 0.0f, 1.0f);
-        moveDirection.Normalize();
-
-        Vector2 movement = Vector2.zero;
-        movement = movement * moveSpeed;
-        movement = movement * Time.fixedDeltaTime;
-
-        CharacterController.Move(new Vector3(0, -0.001f, 0));
-        if (CharacterController.enabled)
+        if (input.Keyinputs.Contains(true))
         {
-            CharacterController.Move(new Vector3(movement.x, movement.y, 0));
+
+            bool w = input.Keyinputs[0];
+            bool a = input.Keyinputs[1];
+            bool s = input.Keyinputs[2];
+            bool d = input.Keyinputs[3];
+            bool space = input.Keyinputs[4];
+
+            moveDirection = new Vector2(0, 0);
+
+            if (w) moveDirection.y = 1;
+            if (s) moveDirection.y = -1;
+            
+            if (a) moveDirection.x = -1;
+            if (d) moveDirection.x = 1;
+
+            moveDirection = moveDirection * Time.fixedDeltaTime;
+            Debug.Log($"movedirection {moveDirection.x}, {moveDirection.y}");
+
+            if (CharacterController.enabled && input.Keyinputs.Contains(true))
+            {
+                CharacterController.Move(new Vector3(moveDirection.x, moveDirection.y, 0));
+            }
         }
 
         return new NetworkingData.PlayerStateData(currentStateData.Id, new System.Numerics.Vector2(transform.localPosition.x, transform.localPosition.y), 0);

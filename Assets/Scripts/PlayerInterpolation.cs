@@ -28,5 +28,7 @@ public class PlayerInterpolation : MonoBehaviour
             new Vector2(PreviousData.Position.X, PreviousData.Position.Y), 
             new Vector2(CurrentData.Position.X, CurrentData.Position.Y), 
             t);
+        
+        Debug.Log($"New position: {transform.position.x}, {transform.position.y}");
     }
 }

@@ -33,6 +33,8 @@ public class ClientPlayer : MonoBehaviour
     
     private float moveSpeed = 40f;
     private Vector2 moveDirection;
+
+    private bool stopSent = false;
     
     [Header("Settings")]
     [SerializeField]
@@ -46,19 +48,19 @@ public class ClientPlayer : MonoBehaviour
         interpolation = GetComponent<PlayerInterpolation>();
     }
     
-    public void Initialize(ushort id, string playerName)
+    public void Initialize(ushort id, string playerName, System.Numerics.Vector2 position)
     {
         this.id = id;
         this.playerName = playerName;
         //NameText.text = this.playerName;
         if (ConnectionManager.Instance.PlayerId == id)
         {
-            Debug.Log("Got info on our player.");
+            Debug.Log($"Initializing our player {playerName} with client id ({id})");
             isOwn = true;
             /*Camera.main.transform.SetParent(transform);
             Camera.main.transform.localPosition = new Vector3(0,0,0);
             Camera.main.transform.localRotation = Quaternion.identity;*/
-            interpolation.CurrentData = new NetworkingData.PlayerStateData(id, new System.Numerics.Vector2(0,0), 0 );
+            interpolation.CurrentData = new NetworkingData.PlayerStateData(id, position, 0 );
         }
     }
     
@@ -104,22 +106,37 @@ public class ClientPlayer : MonoBehaviour
             inputs[2] = Input.GetKey(KeyCode.S);
             inputs[3] = Input.GetKey(KeyCode.D);
             inputs[4] = Input.GetKey(KeyCode.Space);
+            
+            NetworkingData.PlayerInputData inputData = new NetworkingData.PlayerInputData(inputs, 0, 0);
 
-            if (inputs.Contains(true))
+            /*if (inputs.Contains(true))
             {
-                NetworkingData.PlayerInputData inputData = new NetworkingData.PlayerInputData(inputs, 0, 0);
-
+                stopSent = false;
+            */   
                 transform.position =
                     new Vector3(interpolation.CurrentData.Position.X, interpolation.CurrentData.Position.Y, 0);
-                NetworkingData.PlayerStateData nextStateData =
-                    playerLogic.GetNextFrameData(inputData, interpolation.CurrentData);
+                NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(inputData, interpolation.CurrentData);
                 interpolation.SetFramePosition(nextStateData);
+
+                Debug.Log($"[{interpolation.CurrentData.Position.X}, {interpolation.CurrentData.Position.Y}] => [{nextStateData.Position.X}, {nextStateData.Position.Y}]");
 
                 using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
                 {
-                    ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
+                    ConnectionManager.Instance.Client.SendMessage(message, SendMode.Unreliable);
                 }
-            }
+            /*}
+            else
+            {
+                if (!stopSent)
+                {
+                    using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
+                    {
+                        Debug.Log("sending stop");
+                        ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
+                    }
+                    stopSent = true;
+                }
+            }*/
         }
     }
 }
