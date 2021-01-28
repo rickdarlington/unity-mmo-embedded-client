@@ -20,7 +20,7 @@ public class PlayerLogic : MonoBehaviour
         NetworkingData.PlayerInputData input,
         NetworkingData.PlayerStateData currentStateData)
     {
-        Vector2 moveDirection = FrameData.GetNextFrameData(input, currentStateData, Time.deltaTime);
+        Vector2 moveDirection = FrameData.GetNextFrameData(input, Time.deltaTime);
         
         if (CharacterController.enabled && input.Keyinputs.Contains(true))
         {

@@ -6,7 +6,6 @@ namespace Shared
     {
         public static Vector2 GetNextFrameData(
             NetworkingData.PlayerInputData input,
-            NetworkingData.PlayerStateData currentStateData,
             float deltaTime)
         {
             Vector2 moveDirection = new Vector2(0, 0);
