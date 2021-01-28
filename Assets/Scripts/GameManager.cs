@@ -49,7 +49,6 @@ public class GameManager : MonoBehaviour
                     OnGameStart(message.Deserialize<NetworkingData.GameStartData>());
                     break;
                 case NetworkingData.Tags.GameUpdate:
-                    Debug.Log("Got game update data.");
                     OnGameUpdate(message.Deserialize<NetworkingData.GameUpdateData>());
                     break;
                 default: 

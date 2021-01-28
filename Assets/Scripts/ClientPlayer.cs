@@ -66,6 +66,7 @@ public class ClientPlayer : MonoBehaviour
     {
         if (isOwn)
         {
+            Debug.Log($"server says your position is: {data.Position.X}, {data.Position.Y}");
             while (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame < GameManager.Instance.LastReceivedServerTick)
             {
                 reconciliationHistory.Dequeue();
