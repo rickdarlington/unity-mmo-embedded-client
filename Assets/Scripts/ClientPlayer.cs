@@ -57,9 +57,7 @@ public class ClientPlayer : MonoBehaviour
         {
             Debug.Log($"Initializing our player {playerName} with client id ({id})");
             isOwn = true;
-            /*Camera.main.transform.SetParent(transform);
-            Camera.main.transform.localPosition = new Vector3(0,0,0);
-            Camera.main.transform.localRotation = Quaternion.identity;*/
+            
             interpolation.CurrentData = new NetworkingData.PlayerStateData(id, position, 0 );
         }
     }
@@ -118,11 +116,11 @@ public class ClientPlayer : MonoBehaviour
                 NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(inputData, interpolation.CurrentData);
                 interpolation.SetFramePosition(nextStateData);
 
-                Debug.Log($"[{interpolation.CurrentData.Position.X}, {interpolation.CurrentData.Position.Y}] => [{nextStateData.Position.X}, {nextStateData.Position.Y}]");
+                //Debug.Log($"[{interpolation.CurrentData.Position.X}, {interpolation.CurrentData.Position.Y}] => [{nextStateData.Position.X}, {nextStateData.Position.Y}]");
 
                 using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
                 {
-                    ConnectionManager.Instance.Client.SendMessage(message, SendMode.Unreliable);
+                    ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
                 }
             /*}
             else

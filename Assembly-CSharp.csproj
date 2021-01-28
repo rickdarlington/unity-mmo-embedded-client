@@ -64,13 +64,14 @@
      <Compile Include="Assets\DarkRift\DarkRift\Plugins\Server\UnityServer.cs" />
      <Compile Include="Assets\DarkRift\DarkRift\Plugins\Server\UnityServerHelper.cs" />
      <Compile Include="Assets\DarkRift\DarkRift\Plugins\Server\XmlUnityServer.cs" />
-     <Compile Include="Assets\Scripts\Buffer.cs" />
      <Compile Include="Assets\Scripts\ClientPlayer.cs" />
      <Compile Include="Assets\Scripts\ConnectionManager.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\LoginManager.cs" />
      <Compile Include="Assets\Scripts\PlayerInterpolation.cs" />
      <Compile Include="Assets\Scripts\PlayerLogic.cs" />
+     <Compile Include="Assets\Scripts\Shared\Buffer.cs" />
+     <Compile Include="Assets\Scripts\Shared\FrameData.cs" />
      <Compile Include="Assets\Scripts\Shared\NetworkingData.cs" />
      <None Include="Assets\DarkRift\DarkRift\Plugins\Server\ExampleConfiguration.xml" />
      <None Include="Assets\DarkRift\DarkRift\Plugins\link.xml" />
