@@ -51,6 +51,12 @@ public class GameManager : MonoBehaviour
                 case NetworkingData.Tags.GameUpdate:
                     OnGameUpdate(message.Deserialize<NetworkingData.GameUpdateData>());
                     break;
+                case NetworkingData.Tags.PlayerSpawn:
+                    SpawnPlayer(message.Deserialize<NetworkingData.PlayerSpawnData>());
+                    break;
+                case NetworkingData.Tags.PlayerDeSpawn:
+                    DeSpawnPlayer(message.Deserialize<NetworkingData.PlayerDespawnData>().Id);
+                    break;
                 default: 
                     Debug.Log($"Unhandled tag: {message.Tag}");
                     break;
@@ -82,6 +88,15 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Spawn player {data.Name} at [{data.Position.x}, {data.Position.y}]");
     }
 
+    void DeSpawnPlayer(ushort id)
+    {
+        if (players.ContainsKey(id))
+        {
+            Destroy(players[id].gameObject);
+            players.Remove(id);
+        }
+    }
+
     void OnDestroy()
     {
         Instance = null;
@@ -100,24 +115,6 @@ public class GameManager : MonoBehaviour
 
     void UpdateClientGameState(NetworkingData.GameUpdateData gameUpdateData)
     {
-        LastReceivedServerTick = gameUpdateData.Frame;
-        foreach (NetworkingData.PlayerSpawnData data in gameUpdateData.SpawnData)
-        {
-            if (data.Id != ConnectionManager.Instance.PlayerId)
-            {
-                SpawnPlayer(data);
-            }
-        }
-
-        foreach (NetworkingData.PlayerDespawnData data in gameUpdateData.DespawnData)
-        {
-            if (players.ContainsKey(data.Id))
-            {
-                Destroy(players[data.Id].gameObject);
-                players.Remove(data.Id);
-            }
-        }
-
         foreach (NetworkingData.PlayerStateData data in gameUpdateData.UpdateData)
         {
             ClientPlayer p;

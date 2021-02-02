@@ -11,7 +11,9 @@ public class NetworkingData
         PlayerReady = 3,
         GameStartData = 100,
         GameUpdate = 200,
-        GamePlayerInput = 203
+        GamePlayerInput = 203,
+        PlayerSpawn = 300,
+        PlayerDeSpawn = 301
     }
 
     
@@ -194,31 +196,23 @@ public class NetworkingData
     public struct GameUpdateData : IDarkRiftSerializable
     {
         public uint Frame;
-        public PlayerSpawnData[] SpawnData;
-        public PlayerDespawnData[] DespawnData;
         public PlayerStateData[] UpdateData;
 
-        public GameUpdateData(uint frame, PlayerStateData[] updateData, PlayerSpawnData[] spawnData, PlayerDespawnData[] despawnData)
+        public GameUpdateData(uint frame, PlayerStateData[] updateData)
         {
             Frame = frame;
             UpdateData = updateData;
-            DespawnData = despawnData;
-            SpawnData = spawnData;
         }
 
         public void Deserialize(DeserializeEvent e)
         {
             Frame = e.Reader.ReadUInt32();
-            SpawnData = e.Reader.ReadSerializables<PlayerSpawnData>();
-            DespawnData = e.Reader.ReadSerializables<PlayerDespawnData>();
             UpdateData = e.Reader.ReadSerializables<PlayerStateData>();
         }
 
         public void Serialize(SerializeEvent e)
         {
             e.Writer.Write(Frame);
-            e.Writer.Write(SpawnData);
-            e.Writer.Write(DespawnData);
             e.Writer.Write(UpdateData);
         }
     }
