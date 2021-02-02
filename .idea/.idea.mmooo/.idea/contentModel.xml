@@ -42,11 +42,10 @@
           <e p="GameManager.cs" t="Include" />
           <e p="LoginManager.cs" t="Include" />
           <e p="PlayerInterpolation.cs" t="Include" />
-          <e p="PlayerLogic.cs" t="Include" />
           <e p="Shared" t="Include">
             <e p="Buffer.cs" t="Include" />
-            <e p="FrameData.cs" t="Include" />
             <e p="NetworkingData.cs" t="Include" />
+            <e p="PlayerLogic.cs" t="Include" />
           </e>
         </e>
       </e>

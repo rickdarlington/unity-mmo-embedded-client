@@ -1,5 +1,6 @@
-﻿using System.Numerics;
-using DarkRift;
+﻿using DarkRift;
+using UnityEngine;
+
 public class NetworkingData
 {
     public enum Tags
@@ -134,8 +135,8 @@ public class NetworkingData
 
         public void Serialize(SerializeEvent e)
         {
-            e.Writer.Write(Position.X);
-            e.Writer.Write(Position.Y);
+            e.Writer.Write(Position.x);
+            e.Writer.Write(Position.y);
             e.Writer.Write(LookDirection);
             e.Writer.Write(Id);
         }
@@ -165,8 +166,8 @@ public class NetworkingData
         {
             e.Writer.Write(Id);
             e.Writer.Write(Name);
-            e.Writer.Write(Position.X);
-            e.Writer.Write(Position.Y);
+            e.Writer.Write(Position.x);
+            e.Writer.Write(Position.y);
         }
     }
 

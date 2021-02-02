@@ -37,7 +37,6 @@ public class Buffer<T>
             {
                 counter = 0;
             }
-
             counter++;
             if (counter > correctionTollerance)
             {
@@ -58,7 +57,6 @@ public class Buffer<T>
             {
                 counter = 0;
             }
-
             counter--;
             if (-counter > correctionTollerance)
             {
@@ -68,9 +66,8 @@ public class Buffer<T>
 
         if (elements.Any())
         {
-            return new T[] {elements.Dequeue()};
+            return new T[] { elements.Dequeue() };
         }
-
         return new T[0];
     }
 }

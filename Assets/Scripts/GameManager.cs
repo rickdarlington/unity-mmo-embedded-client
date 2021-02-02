@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour
         ClientPlayer player = go.GetComponent<ClientPlayer>();
         player.Initialize(data.Id, data.Name, data.Position);
         players.Add(data.Id, player);
-        Debug.Log($"Spawn player {data.Name} at [{data.Position.X}, {data.Position.Y}]");
+        Debug.Log($"Spawn player {data.Name} at [{data.Position.x}, {data.Position.y}]");
     }
 
     void OnDestroy()

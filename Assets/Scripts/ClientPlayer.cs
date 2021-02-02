@@ -48,7 +48,7 @@ public class ClientPlayer : MonoBehaviour
         interpolation = GetComponent<PlayerInterpolation>();
     }
     
-    public void Initialize(ushort id, string playerName, System.Numerics.Vector2 position)
+    public void Initialize(ushort id, string playerName, Vector2 position)
     {
         this.id = id;
         this.playerName = playerName;
@@ -66,7 +66,7 @@ public class ClientPlayer : MonoBehaviour
     {
         if (isOwn)
         {
-            Debug.Log($"server says your position is: {data.Position.X}, {data.Position.Y}");
+            Debug.Log($"server says your position is: {data.Position.x}, {data.Position.y}");
             while (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame < GameManager.Instance.LastReceivedServerTick)
             {
                 reconciliationHistory.Dequeue();
@@ -75,15 +75,15 @@ public class ClientPlayer : MonoBehaviour
             if (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame == GameManager.Instance.LastReceivedServerTick)
             {
                 ReconciliationInfo info = reconciliationHistory.Dequeue();
-                if (Vector3.Distance(new Vector3(info.Data.Position.X, info.Data.Position.Y, 0),  new Vector3(data.Position.X, data.Position.Y, 0)) > 0.05f)
+                if (Vector3.Distance(new Vector3(info.Data.Position.x, info.Data.Position.y, 0),  new Vector3(data.Position.x, data.Position.y, 0)) > 0.05f)
                 {
 
                     List<ReconciliationInfo> infos = reconciliationHistory.ToList();
                     interpolation.CurrentData = data;
-                    transform.position = new Vector3(data.Position.X, data.Position.Y, 0);
+                    transform.position = new Vector3(data.Position.x, data.Position.y, 0);
                     for (int i = 0; i < infos.Count; i++)
                     {
-                        NetworkingData.PlayerStateData u = playerLogic.GetNextFrameData(infos[i].Input, interpolation.CurrentData);
+                        NetworkingData.PlayerStateData u = playerLogic.GetNextFrameData(interpolation.CurrentData.Id, infos[i].Input);
                         interpolation.SetFramePosition(u);
                     }
                 }
@@ -113,8 +113,8 @@ public class ClientPlayer : MonoBehaviour
                 stopSent = false;
             */   
                 transform.position =
-                    new Vector3(interpolation.CurrentData.Position.X, interpolation.CurrentData.Position.Y, 0);
-                NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(inputData, interpolation.CurrentData);
+                    new Vector3(interpolation.CurrentData.Position.x, interpolation.CurrentData.Position.y, 0);
+                NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(interpolation.CurrentData.Id, inputData);
                 interpolation.SetFramePosition(nextStateData);
 
                 //Debug.Log($"[{interpolation.CurrentData.Position.X}, {interpolation.CurrentData.Position.Y}] => [{nextStateData.Position.X}, {nextStateData.Position.Y}]");

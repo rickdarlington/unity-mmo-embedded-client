@@ -25,8 +25,8 @@ public class PlayerInterpolation : MonoBehaviour
         float t = timeSinceLastInput / Time.fixedDeltaTime;
         
         transform.position = Vector2.LerpUnclamped(
-            new Vector2(PreviousData.Position.X, PreviousData.Position.Y), 
-            new Vector2(CurrentData.Position.X, CurrentData.Position.Y), 
+            new Vector2(PreviousData.Position.x, PreviousData.Position.y), 
+            new Vector2(CurrentData.Position.x, CurrentData.Position.y), 
             t);
     }
 }
