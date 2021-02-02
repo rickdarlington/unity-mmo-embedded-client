@@ -29,19 +29,10 @@ public class ClientPlayer : MonoBehaviour
     private string playerName;
     private bool isOwn;
 
-    private int health;
-    
-    private float moveSpeed = 40f;
     private Vector2 moveDirection;
 
     private bool stopSent = false;
-    
-    [Header("Settings")]
-    [SerializeField]
-    private float sensitivityX;
-    [SerializeField]
-    private float sensitivityY;
-    
+
     void Awake()
     {
         playerLogic = GetComponent<PlayerLogic>();
@@ -66,7 +57,7 @@ public class ClientPlayer : MonoBehaviour
     {
         if (isOwn)
         {
-            Debug.Log($"server says your position is: {data.Position.x}, {data.Position.y}");
+            //Debug.Log($"server says your position is: {data.Position.x}, {data.Position.y}");
             while (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame < GameManager.Instance.LastReceivedServerTick)
             {
                 reconciliationHistory.Dequeue();
@@ -75,12 +66,12 @@ public class ClientPlayer : MonoBehaviour
             if (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame == GameManager.Instance.LastReceivedServerTick)
             {
                 ReconciliationInfo info = reconciliationHistory.Dequeue();
-                if (Vector3.Distance(new Vector3(info.Data.Position.x, info.Data.Position.y, 0),  new Vector3(data.Position.x, data.Position.y, 0)) > 0.05f)
+                if (Vector2.Distance(info.Data.Position, data.Position) > 0.05f)
                 {
 
                     List<ReconciliationInfo> infos = reconciliationHistory.ToList();
                     interpolation.CurrentData = data;
-                    transform.position = new Vector3(data.Position.x, data.Position.y, 0);
+                    transform.position = data.Position;
                     for (int i = 0; i < infos.Count; i++)
                     {
                         NetworkingData.PlayerStateData u = playerLogic.GetNextFrameData(interpolation.CurrentData.Id, infos[i].Input);
@@ -111,9 +102,8 @@ public class ClientPlayer : MonoBehaviour
             /*if (inputs.Contains(true))
             {
                 stopSent = false;
-            */   
-                transform.position =
-                    new Vector3(interpolation.CurrentData.Position.x, interpolation.CurrentData.Position.y, 0);
+            */
+                transform.position = interpolation.CurrentData.Position;
                 NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(interpolation.CurrentData.Id, inputData);
                 interpolation.SetFramePosition(nextStateData);
 
@@ -123,6 +113,9 @@ public class ClientPlayer : MonoBehaviour
                 {
                     ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
                 }
+                
+                reconciliationHistory.Enqueue(new ReconciliationInfo(GameManager.Instance.ClientTick, nextStateData, inputData));
+
             /*}
             else
             {
