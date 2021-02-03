@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateClientGameState(NetworkingData.GameUpdateData gameUpdateData)
     {
+        LastReceivedServerTick = gameUpdateData.Frame;
         foreach (NetworkingData.PlayerStateData data in gameUpdateData.UpdateData)
         {
             ClientPlayer p;

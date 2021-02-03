@@ -2,6 +2,7 @@
 using System.Linq;
 using DarkRift;
 using UnityEngine;
+using UnityEngine.UI;
 
 struct ReconciliationInfo
 {
@@ -21,6 +22,15 @@ struct ReconciliationInfo
 [RequireComponent(typeof(PlayerInterpolation))]
 public class ClientPlayer : MonoBehaviour
 {
+    [SerializeField] private Text nameText;
+    [SerializeField] private Text serverPosition;
+    [SerializeField] private Text localPosition;
+    [SerializeField] private Text reconciliationSize;
+    [SerializeField] private Text serverTick;
+    [SerializeField] private Text clientTick;
+
+    private Vector2 PositionOnServer = new Vector2(0,0);
+    
     private PlayerLogic playerLogic;
     private PlayerInterpolation interpolation;
     private Queue<ReconciliationInfo> reconciliationHistory = new Queue<ReconciliationInfo>();
@@ -43,7 +53,7 @@ public class ClientPlayer : MonoBehaviour
     {
         this.id = id;
         this.playerName = playerName;
-        //NameText.text = this.playerName;
+        nameText.text = playerName;
         if (ConnectionManager.Instance.PlayerId == id)
         {
             Debug.Log($"Initializing our player {playerName} with client id ({id})");
@@ -55,6 +65,7 @@ public class ClientPlayer : MonoBehaviour
     
     public void OnServerDataUpdate(NetworkingData.PlayerStateData data)
     {
+        PositionOnServer = data.Position;
         if (isOwn)
         {
             //Debug.Log($"server says your position is: {data.Position.x}, {data.Position.y}");
@@ -66,7 +77,7 @@ public class ClientPlayer : MonoBehaviour
             if (reconciliationHistory.Any() && reconciliationHistory.Peek().Frame == GameManager.Instance.LastReceivedServerTick)
             {
                 ReconciliationInfo info = reconciliationHistory.Dequeue();
-                if (Vector2.Distance(info.Data.Position, data.Position) > 0.05f)
+                if (Vector2.Distance(info.Data.Position, data.Position) > 0.01f)
                 {
 
                     List<ReconciliationInfo> infos = reconciliationHistory.ToList();
@@ -97,7 +108,7 @@ public class ClientPlayer : MonoBehaviour
             inputs[3] = Input.GetKey(KeyCode.D);
             inputs[4] = Input.GetKey(KeyCode.Space);
             
-            NetworkingData.PlayerInputData inputData = new NetworkingData.PlayerInputData(inputs, 0, 0);
+            NetworkingData.PlayerInputData inputData = new NetworkingData.PlayerInputData(inputs, 0, GameManager.Instance.LastReceivedServerTick - 1);
 
             /*if (inputs.Contains(true))
             {
@@ -107,6 +118,10 @@ public class ClientPlayer : MonoBehaviour
                 NetworkingData.PlayerStateData nextStateData = playerLogic.GetNextFrameData(interpolation.CurrentData.Id, inputData);
                 interpolation.SetFramePosition(nextStateData);
 
+                localPosition.text = $"{interpolation.CurrentData.Position.x},{interpolation.CurrentData.Position.y}";
+                serverPosition.text = $"{PositionOnServer.x},{PositionOnServer.y}";
+
+                
                 //Debug.Log($"[{interpolation.CurrentData.Position.X}, {interpolation.CurrentData.Position.Y}] => [{nextStateData.Position.X}, {nextStateData.Position.Y}]");
 
                 using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
@@ -115,20 +130,25 @@ public class ClientPlayer : MonoBehaviour
                 }
                 
                 reconciliationHistory.Enqueue(new ReconciliationInfo(GameManager.Instance.ClientTick, nextStateData, inputData));
+                reconciliationSize.text = $"{reconciliationHistory.Count}";
 
-            /*}
-            else
-            {
-                if (!stopSent)
+                /*}
+                else
                 {
-                    using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
+                    if (!stopSent)
                     {
-                        Debug.Log("sending stop");
-                        ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
+                        using (Message message = Message.Create((ushort) NetworkingData.Tags.GamePlayerInput, inputData))
+                        {
+                            Debug.Log("sending stop");
+                            ConnectionManager.Instance.Client.SendMessage(message, SendMode.Reliable);
+                        }
+                        stopSent = true;
                     }
-                    stopSent = true;
-                }
-            }*/
+                }*/
+
+                serverTick.text = $"{GameManager.Instance.LastReceivedServerTick}";
+                clientTick.text = $"{GameManager.Instance.ClientTick}";
+
         }
     }
 }
